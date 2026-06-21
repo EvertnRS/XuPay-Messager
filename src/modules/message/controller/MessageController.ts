@@ -1,5 +1,5 @@
 import { Socket } from "net";
-import { Request, isValidBodyRequest} from "@/@types/contracts/Request";
+import { Request, isValidRequest} from "@/@types/contracts/Request";
 import { MessageService } from "../service/MessageService";
 
 export class MessageController{
@@ -8,10 +8,10 @@ export class MessageController{
     ) {}
 
     public publish(request: Request, socket: Socket): void {
-        const messageBody = isValidBodyRequest(request.body, socket);
-        if (!messageBody) {
+        const validRequest = isValidRequest(request, socket);
+        if (!validRequest) {
             return;
         }
-        this.messageService.publish(messageBody, socket);
+        this.messageService.publish(validRequest, socket);
     }
 }

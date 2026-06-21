@@ -1,4 +1,5 @@
 import { SocketClient } from "@/infra/client/SocketClient";
+import { ResponseParser } from "@/infra/parser/ResponseParser";
 
 export class ServiceClient {
   constructor(
@@ -7,8 +8,8 @@ export class ServiceClient {
     private readonly servicePort: number
   ) {}
 
-  public async send(queueMessageId: string, service: string, apiPayload: string): Promise<void> {
-    const request = this.buildSendRequest(queueMessageId, service, apiPayload);
+  public async send(queueMessageId: string, service: string, payloadHash: string): Promise<void> {
+    const request = this.buildSendRequest(queueMessageId, service, payloadHash);
 
     await this.socketClient.send(
       this.serviceHost,
@@ -18,9 +19,18 @@ export class ServiceClient {
 
     }
 
-  private buildSendRequest(queueMessageId: string, service: string, apiPayload: string): string {
-    const payload = `queueMessageId=${queueMessageId},service=${service},apiPayload=${apiPayload}`;
-
-    return `POST|redirect|MESSAGE_SERVICE;REQUEST;${payload};${new Date().toISOString()}`;
+  private buildSendRequest(queueMessageId: string, service: string, payloadHash: string): string {
+    return ResponseParser.serialize({
+      method: "POST",
+      path: "redirect",
+      service: process.env.XUPAY_SERVICE_NAME || "xupay-mensageria",
+      secret: process.env.XUPAY_SERVICE_SECRET,
+      body: {
+        queueMessageId,
+        service,
+        payloadHash,
+        timestamp: new Date().toISOString(),
+      },
+    });
   }
 }
