@@ -1,7 +1,7 @@
 import { Socket } from "net";
 import { QueueMessageService } from "../service/QueueMessageService";
 import type { Request }  from "../../../@types/contracts/Request";
-import { isValidBodyRequest } from "@/@types/contracts/Request";
+import { isValidRequest } from "@/@types/contracts/Request";
 
 export class QueueMessageController{
     constructor(
@@ -9,13 +9,13 @@ export class QueueMessageController{
     ) {}
 
     public async retry(request: Request, socket: Socket): Promise<void> {
-        const messageBody = isValidBodyRequest(request.body, socket);
+        const validRequest = isValidRequest(request, socket);
 
-        if (!messageBody) {
+        if (!validRequest) {
             return;
         }
 
-        this.queueMessageService.retryMessage(messageBody, socket);
+        this.queueMessageService.retryMessage(validRequest, socket);
 
     }
     

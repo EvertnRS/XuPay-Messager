@@ -1,168 +1,197 @@
-import type { Request } from "../../@types/contracts/Request";
-import { MessagePayload } from "@/@types/contracts/MessagePayload";
-import { QueueMessagePayload } from "@/@types/contracts/QueueMessagePayload";
-import { Payload } from "@/@types/contracts/MessageBody";
+import {
+  createRequestSignature,
+  normalizePath,
+} from "../../@types/contracts/Request";
+import type { Request, RequestHeaders } from "../../@types/contracts/Request";
+import type { MessagePayload, JsonValue } from "@/@types/contracts/MessagePayload";
+import type { QueueMessagePayload } from "@/@types/contracts/QueueMessagePayload";
+import type { Payload } from "@/@types/contracts/MessageBody";
+import { JsonCodec } from "./JsonCodec";
+import type { JsonObject } from "./JsonCodec";
+
+type SerializableRequest = {
+  method: string;
+  path: string;
+  headers?: RequestHeaders;
+  body: JsonObject;
+  service?: string;
+  secret?: string;
+};
 
 export class ResponseParser {
   public static deserialize(rawRequest: string): Request {
     const request = rawRequest.trim();
 
-    const parts = request.split("|");
+    if (!this.isHttpRequest(request)) {
+      throw new Error("Protocolo inválido. Esperado HTTP/1.1 ou HTTP/1.0");
+    }
 
-    if (parts.length !== 3) {
-      throw new Error(
-        "Requisição com campos diferentes do esperado " + request
+    return this.deserializeHttpRequest(request);
+  }
+
+  public static serialize(request: SerializableRequest): string {
+    const method = request.method.toUpperCase();
+    const path = normalizePath(request.path);
+    const rawBody = JsonCodec.stringify(request.body);
+    const headers: RequestHeaders = {
+      host: "xupay-mensageria",
+      "content-type": "application/json",
+      "content-length": Buffer.byteLength(rawBody).toString(),
+      ...this.normalizeHeaders(request.headers || {}),
+    };
+
+    if (request.service && request.secret) {
+      headers["x-xupay-service"] = request.service;
+      headers["x-xupay-signature"] = createRequestSignature(
+        method,
+        path,
+        rawBody,
+        request.secret
       );
     }
 
-    const [method, path, rawBody] = parts;
+    const headerLines = Object.entries(headers).map(
+      ([key, value]) => `${this.toHttpHeaderName(key)}: ${value}`
+    );
 
-    const bodyParts = rawBody.split(";").map((part) => part.trim());
+    return `${method} /${path} HTTP/1.1\r\n${headerLines.join(
+      "\r\n"
+    )}\r\n\r\n${rawBody}`;
+  }
 
-    if (bodyParts.length !== 4) {
-      throw new Error(
-        "Corpo da requisição com campos diferentes do esperado " + request
-      );
+  public static serializeResponse(statusCode: number, body: JsonObject): string {
+    const statusText = statusCode >= 400 ? "Error" : "OK";
+    const rawBody = JsonCodec.stringify(body);
+
+    return `HTTP/1.1 ${statusCode} ${statusText}\r\nContent-Type: application/json\r\nContent-Length: ${Buffer.byteLength(
+      rawBody
+    )}\r\n\r\n${rawBody}`;
+  }
+
+  private static isHttpRequest(request: string): boolean {
+    return /^[A-Z]+ \S+ HTTP\/1\.[01]/.test(request);
+  }
+
+  private static deserializeHttpRequest(rawRequest: string): Request {
+    const separator = rawRequest.indexOf("\r\n\r\n");
+
+    if (separator === -1) {
+      throw new Error("Requisição HTTP sem separador entre headers e body");
     }
 
-    const [source, type, rawPayload, timestamp] = bodyParts;
-
-    const payload = this.parsePayloadByContent(rawPayload);
+    const headerPart = rawRequest.slice(0, separator);
+    const rawBody = rawRequest.slice(separator + 4);
+    const [requestLine, ...headerLines] = headerPart.split("\r\n");
+    const [method, rawPath] = requestLine.split(" ");
+    const headers = this.parseHeaders(headerLines);
+    const parsedBody = this.parseJsonObject(rawBody);
 
     return {
-      method,
-      path,
+      method: method.toUpperCase(),
+      path: normalizePath(rawPath),
+      headers,
       body: {
-        source,
-        type,
-        payload,
-        timestamp,
+        payload: this.parsePayloadByPath(normalizePath(rawPath), parsedBody),
+        timestamp: this.optionalString(parsedBody.timestamp),
       },
+      rawBody
     };
   }
 
-  private static parsePayloadByContent(rawPayload: string): Payload {
-    const payload = rawPayload.trim();
-
-    if (!payload) {
-      throw new Error("Payload vazio");
+  private static parsePayloadByPath(path: string, body: JsonObject): Payload {
+    if (path === "publish") {
+      return this.parseMessagePayload(body);
     }
 
-    if (this.isMessagePayloadContent(payload)) {
-      return this.parseMessagePayload(payload);
+    if (path === "retry") {
+      return this.parseQueueMessagePayload(body);
     }
 
-    if (this.isQueueMessagePayloadContent(payload)) {
-      return this.parseQueueMessagePayload(payload);
+    if (typeof body.id === "string") {
+      return this.parseQueueMessagePayload(body);
     }
 
-    throw new Error(
-      "Formato de payload não reconhecido. Esperado MessagePayload ou QueueMessagePayload."
-    );
+    return this.parseMessagePayload(body);
   }
 
-  private static isMessagePayloadContent(rawPayload: string): boolean {
-    return rawPayload.includes(",apiPayload=");
-  }
-
-  private static isQueueMessagePayloadContent(rawPayload: string): boolean {
-    const parsed = this.parseKeyValueList(rawPayload);
-
-    return (
-      typeof parsed.id === "string" &&
-      !parsed.service &&
-      !parsed.idempotencyKey &&
-      !parsed.apiPayload
-    );
-  }
-
-  private static parseMessagePayload(rawPayload: string): MessagePayload {
-    const apiPayloadMarker = ",apiPayload=";
-    const markerIndex = rawPayload.indexOf(apiPayloadMarker);
-
-    if (markerIndex === -1) {
-      throw new Error(
-        "Payload inválido. Esperado: service=xxx,idempotencyKey=yyy,apiPayload=zzz"
-      );
-    }
-
-    const metadataPart = rawPayload.slice(0, markerIndex);
-    const apiPayload = rawPayload.slice(
-      markerIndex + apiPayloadMarker.length
-    );
-
-    const metadata = this.parseKeyValueList(metadataPart);
-
-    if (!metadata.service) {
+  private static parseMessagePayload(body: JsonObject): MessagePayload {
+    if (typeof body.service !== "string" || !body.service.trim()) {
       throw new Error("Payload inválido. Campo service ausente.");
     }
 
-    if (!metadata.idempotencyKey) {
+    if (
+      typeof body.idempotencyKey !== "string" ||
+      !body.idempotencyKey.trim()
+    ) {
       throw new Error("Payload inválido. Campo idempotencyKey ausente.");
     }
 
-    if (!apiPayload.trim()) {
-      throw new Error("Payload inválido. Campo apiPayload vazio.");
+    if (!("apiPayload" in body)) {
+      throw new Error("Payload inválido. Campo apiPayload ausente.");
     }
 
     return {
       kind: "MESSAGE_PAYLOAD",
-      service: metadata.service,
-      idempotencyKey: metadata.idempotencyKey,
-      apiPayload: apiPayload.trim(),
+      service: body.service,
+      idempotencyKey: body.idempotencyKey,
+      apiPayload: body.apiPayload,
     };
   }
 
-  private static parseQueueMessagePayload(
-    rawPayload: string
-  ): QueueMessagePayload {
-    const payload = this.parseKeyValueList(rawPayload);
-
-    if (!payload.id) {
+  private static parseQueueMessagePayload(body: JsonObject): QueueMessagePayload {
+    if (typeof body.id !== "string" || !body.id.trim()) {
       throw new Error("Payload inválido. Campo id ausente.");
     }
 
     return {
       kind: "QUEUE_MESSAGE_PAYLOAD",
-      id: payload.id,
+      id: body.id,
     };
   }
 
-  private static parseKeyValueList(raw: string): Record<string, string> {
-    const result: Record<string, string> = {};
+  private static parseHeaders(headerLines: string[]): RequestHeaders {
+    const headers: RequestHeaders = {};
 
-    const fields = raw.split(",");
-
-    for (const field of fields) {
-      const separatorIndex = field.indexOf("=");
+    for (const line of headerLines) {
+      const separatorIndex = line.indexOf(":");
 
       if (separatorIndex === -1) {
-        throw new Error(`Campo inválido: ${field}`);
+        continue;
       }
 
-      const key = field.slice(0, separatorIndex).trim();
-      const value = field.slice(separatorIndex + 1).trim();
+      const key = line.slice(0, separatorIndex).trim().toLowerCase();
+      const value = line.slice(separatorIndex + 1).trim();
 
-      if (!key || !value) {
-        throw new Error(`Campo inválido: ${field}`);
+      if (key) {
+        headers[key] = value;
       }
-
-      result[key] = value;
     }
 
-    return result;
+    return headers;
   }
 
-  public static serialize(response: {
-    method: string;
-    path: string;
-    body: {
-      source: string;
-      type: string;
-      payload: string;
-      timestamp: string;
-    };
-  }): string {
-    return `${response.method}|${response.path}|${response.body.source};${response.body.type};${response.body.payload};${response.body.timestamp}`;
+  private static parseJsonObject(rawBody: string): JsonObject {
+    return JsonCodec.parseObject(rawBody);
+  }
+
+  private static optionalString(value: JsonValue | undefined): string | undefined {
+    return typeof value === "string" ? value : undefined;
+  }
+
+  private static normalizeHeaders(headers: RequestHeaders): RequestHeaders {
+    const normalizedHeaders: RequestHeaders = {};
+
+    for (const [key, value] of Object.entries(headers)) {
+      normalizedHeaders[key.toLowerCase()] = value;
+    }
+
+    return normalizedHeaders;
+  }
+
+  private static toHttpHeaderName(header: string): string {
+    return header
+      .split("-")
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join("-");
   }
 }

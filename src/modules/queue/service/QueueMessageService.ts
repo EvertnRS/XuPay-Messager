@@ -2,8 +2,8 @@ import { IQueueMessageRepository } from "../domain/repository/IQueueMessageRepos
 import { QueueMessage } from "../domain/entity/QueueMessage";
 import { Socket } from "net";
 import { ResponseParser } from "@/infra/parser/ResponseParser";
-import { MessageBody } from "@/@types/contracts/MessageBody";
 import { ErrorHandler } from "@/infra/middleware/Error";
+import { Request } from "@/@types/contracts/Request";
 
 export class QueueMessageService {
     constructor(
@@ -22,9 +22,11 @@ export class QueueMessageService {
         await this.queueMessageRepository.updateMessage(queueMessage);
     }
 
-    public async retryMessage(messageBody: MessageBody, socket: Socket): Promise<void> {
+    public async retryMessage(request: Request, socket: Socket): Promise<void> {
+        const messageBody = request.body;
+
         if (messageBody.payload.kind !== "QUEUE_MESSAGE_PAYLOAD") {
-            return ErrorHandler.handle("Payload inválido para publicação",socket);
+            return ErrorHandler.handle("Payload inválido para publicação", socket);
         }
 
         if (!messageBody.payload.id) {
@@ -39,18 +41,14 @@ export class QueueMessageService {
 
         await this.internalRetryMessage(queueMessage);
 
-        const payload = `id=${queueMessage.id},status=${queueMessage.status},retryCount=${queueMessage.retryCount}`;
-        
-        const response = ResponseParser.serialize({
-            method: 'POST',
-            path:'retry',
-            body: {
-                source: 'SERVICE_CLIENT',
-                type: 'RESPONSE',
-                payload,
-                timestamp: new Date().toISOString()
-            }
-        });
+        const responseBody = {
+            id: queueMessage.id,
+            status: queueMessage.status,
+            retryCount: queueMessage.retryCount,
+            timestamp: new Date().toISOString()
+        };
+
+        const response = ResponseParser.serializeResponse(200, responseBody);
         
         socket.write(response);
         socket.end();

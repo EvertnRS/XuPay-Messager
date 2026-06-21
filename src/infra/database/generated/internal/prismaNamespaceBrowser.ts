@@ -73,10 +73,8 @@ export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof
 
 export const MessageScalarFieldEnum = {
   id: 'id',
-  source: 'source',
-  type: 'type',
   service: 'service',
-  payload: 'payload',
+  payloadHash: 'payloadHash',
   timestamp: 'timestamp',
   idempotencyKey: 'idempotencyKey'
 } as const

@@ -1,4 +1,3 @@
-import { MessageBody } from "@/@types/contracts/MessageBody";
 import { Socket } from "net";
 import { IMessageRepository } from "../domain/repository/IMessageRepository";
 import { queueEventBus } from "../../../infra/event/QueueEventBus";
@@ -7,6 +6,9 @@ import { QueueMessageService } from "@/modules/queue/service/QueueMessageService
 import { MessageWorker } from "@/modules/worker/MessageWorker";
 import { ResponseParser } from "@/infra/parser/ResponseParser";
 import crypto from "crypto";
+import { JsonValue } from "@/@types/contracts/MessagePayload";
+import { Request } from "@/@types/contracts/Request";
+import { JsonCodec } from "@/infra/parser/JsonCodec";
 
 export class MessageService {
   private readonly messageWorker: MessageWorker;
@@ -19,9 +21,11 @@ export class MessageService {
     this.messageWorker.register();
   }
 
-  public async publish(messageBody: MessageBody, socket: Socket): Promise<void> {
+  public async publish(request: Request, socket: Socket): Promise<void> {
+    const messageBody = request.body;
+
     if (messageBody.payload.kind !== "MESSAGE_PAYLOAD") {
-      return ErrorHandler.handle("Payload inválido para publicação",socket);
+      return ErrorHandler.handle("Payload inválido para publicação", socket);
     }
 
     const apiPayload = messageBody.payload.apiPayload;
@@ -37,11 +41,9 @@ export class MessageService {
     const payloadHash = this.generatePayloadHash(apiPayload);
 
     const savedMessage = await this.messageRepository.saveMessage({
-      source: messageBody.source,
-      type: messageBody.type,
       service: messageBody.payload.service,
-      payload: payloadHash,
-      timestamp: new Date(messageBody.timestamp),
+      payloadHash,
+      timestamp: messageBody.timestamp ? new Date(messageBody.timestamp) : new Date(),
       idempotencyKey: messageBody.payload.idempotencyKey
     });
 
@@ -49,28 +51,23 @@ export class MessageService {
       messageId: savedMessage.id,
     });
 
-    const payload = `service=${messageBody.payload.service},apiPayload=${apiPayload}`;
+    const responseBody = {
+      service: messageBody.payload.service,
+      payloadHash,
+      receivedFrom: request.origin?.service || "unknown",
+      timestamp: new Date().toISOString(),
+    };
 
-    const response = ResponseParser.serialize({
-        method: 'POST',
-        path:'publish',
-        body: {
-            source: 'MESSAGE_SERVICE',
-            type: 'RESPONSE',
-            payload,
-            timestamp: new Date().toISOString()
-        }
-    });
+    const response = ResponseParser.serializeResponse(201, responseBody);
 
     socket.write(response);
     socket.end();
   }
 
-  private generatePayloadHash(payload: string): string {
+  private generatePayloadHash(payload: JsonValue): string {
     return crypto
       .createHash("sha256")
-      .update(payload)
+      .update(JsonCodec.stableStringify(payload))
       .digest("hex");
   }
-
 }
