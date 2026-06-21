@@ -7,7 +7,6 @@ import { MessageWorker } from "@/modules/worker/MessageWorker";
 import { ResponseParser } from "@/infra/parser/ResponseParser";
 import crypto from "crypto";
 import { JsonValue } from "@/@types/contracts/MessagePayload";
-import { Request } from "@/@types/contracts/Request";
 import { JsonCodec } from "@/infra/parser/JsonCodec";
 
 export class MessageService {
@@ -21,9 +20,7 @@ export class MessageService {
     this.messageWorker.register();
   }
 
-  public async publish(request: Request, socket: Socket): Promise<void> {
-    const messageBody = request.body;
-
+  public async publish(messageBody: any, socket: Socket): Promise<void> {
     if (messageBody.payload.kind !== "MESSAGE_PAYLOAD") {
       return ErrorHandler.handle("Payload inválido para publicação", socket);
     }
@@ -54,7 +51,6 @@ export class MessageService {
     const responseBody = {
       service: messageBody.payload.service,
       payloadHash,
-      receivedFrom: request.origin?.service || "unknown",
       timestamp: new Date().toISOString(),
     };
 

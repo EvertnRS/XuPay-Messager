@@ -9,9 +9,13 @@ export class MessageController{
 
     public publish(request: Request, socket: Socket): void {
         const validRequest = isValidRequest(request, socket);
+
         if (!validRequest) {
             return;
         }
-        this.messageService.publish(validRequest, socket);
+
+        const messageBody = request.body;
+
+        this.messageService.publish(messageBody, socket);
     }
 }

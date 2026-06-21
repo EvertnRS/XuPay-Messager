@@ -15,7 +15,9 @@ export class QueueMessageController{
             return;
         }
 
-        this.queueMessageService.retryMessage(validRequest, socket);
+        const messageBody = request.body;
+
+        this.queueMessageService.retryMessage(messageBody, socket);
 
     }
     

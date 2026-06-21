@@ -3,7 +3,6 @@ import { QueueMessage } from "../domain/entity/QueueMessage";
 import { Socket } from "net";
 import { ResponseParser } from "@/infra/parser/ResponseParser";
 import { ErrorHandler } from "@/infra/middleware/Error";
-import { Request } from "@/@types/contracts/Request";
 
 export class QueueMessageService {
     constructor(
@@ -22,8 +21,7 @@ export class QueueMessageService {
         await this.queueMessageRepository.updateMessage(queueMessage);
     }
 
-    public async retryMessage(request: Request, socket: Socket): Promise<void> {
-        const messageBody = request.body;
+    public async retryMessage(messageBody: any, socket: Socket): Promise<void> {
 
         if (messageBody.payload.kind !== "QUEUE_MESSAGE_PAYLOAD") {
             return ErrorHandler.handle("Payload inválido para publicação", socket);
