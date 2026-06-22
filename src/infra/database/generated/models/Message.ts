@@ -27,7 +27,7 @@ export type AggregateMessage = {
 export type MessageMinAggregateOutputType = {
   id: string | null
   event: $Enums.Event | null
-  payloadEncrypted: string | null
+  payloadHash: string | null
   timestamp: Date | null
   idempotencyKey: string | null
 }
@@ -35,7 +35,7 @@ export type MessageMinAggregateOutputType = {
 export type MessageMaxAggregateOutputType = {
   id: string | null
   event: $Enums.Event | null
-  payloadEncrypted: string | null
+  payloadHash: string | null
   timestamp: Date | null
   idempotencyKey: string | null
 }
@@ -43,7 +43,7 @@ export type MessageMaxAggregateOutputType = {
 export type MessageCountAggregateOutputType = {
   id: number
   event: number
-  payloadEncrypted: number
+  payloadHash: number
   timestamp: number
   idempotencyKey: number
   _all: number
@@ -53,7 +53,7 @@ export type MessageCountAggregateOutputType = {
 export type MessageMinAggregateInputType = {
   id?: true
   event?: true
-  payloadEncrypted?: true
+  payloadHash?: true
   timestamp?: true
   idempotencyKey?: true
 }
@@ -61,7 +61,7 @@ export type MessageMinAggregateInputType = {
 export type MessageMaxAggregateInputType = {
   id?: true
   event?: true
-  payloadEncrypted?: true
+  payloadHash?: true
   timestamp?: true
   idempotencyKey?: true
 }
@@ -69,7 +69,7 @@ export type MessageMaxAggregateInputType = {
 export type MessageCountAggregateInputType = {
   id?: true
   event?: true
-  payloadEncrypted?: true
+  payloadHash?: true
   timestamp?: true
   idempotencyKey?: true
   _all?: true
@@ -150,7 +150,7 @@ export type MessageGroupByArgs<ExtArgs extends runtime.Types.Extensions.Internal
 export type MessageGroupByOutputType = {
   id: string
   event: $Enums.Event
-  payloadEncrypted: string
+  payloadHash: string
   timestamp: Date
   idempotencyKey: string
   _count: MessageCountAggregateOutputType | null
@@ -179,7 +179,7 @@ export type MessageWhereInput = {
   NOT?: Prisma.MessageWhereInput | Prisma.MessageWhereInput[]
   id?: Prisma.StringFilter<"Message"> | string
   event?: Prisma.EnumEventFilter<"Message"> | $Enums.Event
-  payloadEncrypted?: Prisma.StringFilter<"Message"> | string
+  payloadHash?: Prisma.StringFilter<"Message"> | string
   timestamp?: Prisma.DateTimeFilter<"Message"> | Date | string
   idempotencyKey?: Prisma.StringFilter<"Message"> | string
   queueMessages?: Prisma.QueueMessageListRelationFilter
@@ -188,7 +188,7 @@ export type MessageWhereInput = {
 export type MessageOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   event?: Prisma.SortOrder
-  payloadEncrypted?: Prisma.SortOrder
+  payloadHash?: Prisma.SortOrder
   timestamp?: Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
   queueMessages?: Prisma.QueueMessageOrderByRelationAggregateInput
@@ -201,7 +201,7 @@ export type MessageWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.MessageWhereInput[]
   NOT?: Prisma.MessageWhereInput | Prisma.MessageWhereInput[]
   event?: Prisma.EnumEventFilter<"Message"> | $Enums.Event
-  payloadEncrypted?: Prisma.StringFilter<"Message"> | string
+  payloadHash?: Prisma.StringFilter<"Message"> | string
   timestamp?: Prisma.DateTimeFilter<"Message"> | Date | string
   queueMessages?: Prisma.QueueMessageListRelationFilter
 }, "id" | "idempotencyKey">
@@ -209,7 +209,7 @@ export type MessageWhereUniqueInput = Prisma.AtLeast<{
 export type MessageOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   event?: Prisma.SortOrder
-  payloadEncrypted?: Prisma.SortOrder
+  payloadHash?: Prisma.SortOrder
   timestamp?: Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
   _count?: Prisma.MessageCountOrderByAggregateInput
@@ -223,7 +223,7 @@ export type MessageScalarWhereWithAggregatesInput = {
   NOT?: Prisma.MessageScalarWhereWithAggregatesInput | Prisma.MessageScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Message"> | string
   event?: Prisma.EnumEventWithAggregatesFilter<"Message"> | $Enums.Event
-  payloadEncrypted?: Prisma.StringWithAggregatesFilter<"Message"> | string
+  payloadHash?: Prisma.StringWithAggregatesFilter<"Message"> | string
   timestamp?: Prisma.DateTimeWithAggregatesFilter<"Message"> | Date | string
   idempotencyKey?: Prisma.StringWithAggregatesFilter<"Message"> | string
 }
@@ -231,7 +231,7 @@ export type MessageScalarWhereWithAggregatesInput = {
 export type MessageCreateInput = {
   id?: string
   event: $Enums.Event
-  payloadEncrypted: string
+  payloadHash: string
   timestamp?: Date | string
   idempotencyKey: string
   queueMessages?: Prisma.QueueMessageCreateNestedManyWithoutMessageInput
@@ -240,7 +240,7 @@ export type MessageCreateInput = {
 export type MessageUncheckedCreateInput = {
   id?: string
   event: $Enums.Event
-  payloadEncrypted: string
+  payloadHash: string
   timestamp?: Date | string
   idempotencyKey: string
   queueMessages?: Prisma.QueueMessageUncheckedCreateNestedManyWithoutMessageInput
@@ -249,7 +249,7 @@ export type MessageUncheckedCreateInput = {
 export type MessageUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   event?: Prisma.EnumEventFieldUpdateOperationsInput | $Enums.Event
-  payloadEncrypted?: Prisma.StringFieldUpdateOperationsInput | string
+  payloadHash?: Prisma.StringFieldUpdateOperationsInput | string
   timestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   queueMessages?: Prisma.QueueMessageUpdateManyWithoutMessageNestedInput
@@ -258,7 +258,7 @@ export type MessageUpdateInput = {
 export type MessageUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   event?: Prisma.EnumEventFieldUpdateOperationsInput | $Enums.Event
-  payloadEncrypted?: Prisma.StringFieldUpdateOperationsInput | string
+  payloadHash?: Prisma.StringFieldUpdateOperationsInput | string
   timestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   queueMessages?: Prisma.QueueMessageUncheckedUpdateManyWithoutMessageNestedInput
@@ -267,7 +267,7 @@ export type MessageUncheckedUpdateInput = {
 export type MessageCreateManyInput = {
   id?: string
   event: $Enums.Event
-  payloadEncrypted: string
+  payloadHash: string
   timestamp?: Date | string
   idempotencyKey: string
 }
@@ -275,7 +275,7 @@ export type MessageCreateManyInput = {
 export type MessageUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   event?: Prisma.EnumEventFieldUpdateOperationsInput | $Enums.Event
-  payloadEncrypted?: Prisma.StringFieldUpdateOperationsInput | string
+  payloadHash?: Prisma.StringFieldUpdateOperationsInput | string
   timestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
 }
@@ -283,7 +283,7 @@ export type MessageUpdateManyMutationInput = {
 export type MessageUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   event?: Prisma.EnumEventFieldUpdateOperationsInput | $Enums.Event
-  payloadEncrypted?: Prisma.StringFieldUpdateOperationsInput | string
+  payloadHash?: Prisma.StringFieldUpdateOperationsInput | string
   timestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
 }
@@ -291,7 +291,7 @@ export type MessageUncheckedUpdateManyInput = {
 export type MessageCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   event?: Prisma.SortOrder
-  payloadEncrypted?: Prisma.SortOrder
+  payloadHash?: Prisma.SortOrder
   timestamp?: Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
 }
@@ -299,7 +299,7 @@ export type MessageCountOrderByAggregateInput = {
 export type MessageMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   event?: Prisma.SortOrder
-  payloadEncrypted?: Prisma.SortOrder
+  payloadHash?: Prisma.SortOrder
   timestamp?: Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
 }
@@ -307,7 +307,7 @@ export type MessageMaxOrderByAggregateInput = {
 export type MessageMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   event?: Prisma.SortOrder
-  payloadEncrypted?: Prisma.SortOrder
+  payloadHash?: Prisma.SortOrder
   timestamp?: Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
 }
@@ -346,7 +346,7 @@ export type MessageUpdateOneRequiredWithoutQueueMessagesNestedInput = {
 export type MessageCreateWithoutQueueMessagesInput = {
   id?: string
   event: $Enums.Event
-  payloadEncrypted: string
+  payloadHash: string
   timestamp?: Date | string
   idempotencyKey: string
 }
@@ -354,7 +354,7 @@ export type MessageCreateWithoutQueueMessagesInput = {
 export type MessageUncheckedCreateWithoutQueueMessagesInput = {
   id?: string
   event: $Enums.Event
-  payloadEncrypted: string
+  payloadHash: string
   timestamp?: Date | string
   idempotencyKey: string
 }
@@ -378,7 +378,7 @@ export type MessageUpdateToOneWithWhereWithoutQueueMessagesInput = {
 export type MessageUpdateWithoutQueueMessagesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   event?: Prisma.EnumEventFieldUpdateOperationsInput | $Enums.Event
-  payloadEncrypted?: Prisma.StringFieldUpdateOperationsInput | string
+  payloadHash?: Prisma.StringFieldUpdateOperationsInput | string
   timestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
 }
@@ -386,7 +386,7 @@ export type MessageUpdateWithoutQueueMessagesInput = {
 export type MessageUncheckedUpdateWithoutQueueMessagesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   event?: Prisma.EnumEventFieldUpdateOperationsInput | $Enums.Event
-  payloadEncrypted?: Prisma.StringFieldUpdateOperationsInput | string
+  payloadHash?: Prisma.StringFieldUpdateOperationsInput | string
   timestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
 }
@@ -425,7 +425,7 @@ export type MessageCountOutputTypeCountQueueMessagesArgs<ExtArgs extends runtime
 export type MessageSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   event?: boolean
-  payloadEncrypted?: boolean
+  payloadHash?: boolean
   timestamp?: boolean
   idempotencyKey?: boolean
   queueMessages?: boolean | Prisma.Message$queueMessagesArgs<ExtArgs>
@@ -435,7 +435,7 @@ export type MessageSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
 export type MessageSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   event?: boolean
-  payloadEncrypted?: boolean
+  payloadHash?: boolean
   timestamp?: boolean
   idempotencyKey?: boolean
 }, ExtArgs["result"]["message"]>
@@ -443,7 +443,7 @@ export type MessageSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
 export type MessageSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   event?: boolean
-  payloadEncrypted?: boolean
+  payloadHash?: boolean
   timestamp?: boolean
   idempotencyKey?: boolean
 }, ExtArgs["result"]["message"]>
@@ -451,12 +451,12 @@ export type MessageSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
 export type MessageSelectScalar = {
   id?: boolean
   event?: boolean
-  payloadEncrypted?: boolean
+  payloadHash?: boolean
   timestamp?: boolean
   idempotencyKey?: boolean
 }
 
-export type MessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "event" | "payloadEncrypted" | "timestamp" | "idempotencyKey", ExtArgs["result"]["message"]>
+export type MessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "event" | "payloadHash" | "timestamp" | "idempotencyKey", ExtArgs["result"]["message"]>
 export type MessageInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   queueMessages?: boolean | Prisma.Message$queueMessagesArgs<ExtArgs>
   _count?: boolean | Prisma.MessageCountOutputTypeDefaultArgs<ExtArgs>
@@ -472,7 +472,7 @@ export type $MessagePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     event: $Enums.Event
-    payloadEncrypted: string
+    payloadHash: string
     timestamp: Date
     idempotencyKey: string
   }, ExtArgs["result"]["message"]>
@@ -901,7 +901,7 @@ export interface Prisma__MessageClient<T, Null = never, ExtArgs extends runtime.
 export interface MessageFieldRefs {
   readonly id: Prisma.FieldRef<"Message", 'String'>
   readonly event: Prisma.FieldRef<"Message", 'Event'>
-  readonly payloadEncrypted: Prisma.FieldRef<"Message", 'String'>
+  readonly payloadHash: Prisma.FieldRef<"Message", 'String'>
   readonly timestamp: Prisma.FieldRef<"Message", 'DateTime'>
   readonly idempotencyKey: Prisma.FieldRef<"Message", 'String'>
 }

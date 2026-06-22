@@ -7,7 +7,7 @@ export class MessageRepositoryImpl implements IMessageRepository {
         return await (prismaClient.message.create as any)({
             data: {
                 event: message.event,
-                payloadEncrypted: message.payloadEncrypted,
+                payloadHash: message.payloadHash,
                 timestamp: message.timestamp,
                 idempotencyKey: message.idempotencyKey
             }

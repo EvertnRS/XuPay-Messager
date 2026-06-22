@@ -30,8 +30,8 @@ enum Event {
 
 model Message {
   id             String   @id @default(uuid()) @map("id")
-  event        Event
-  payloadEncrypted    String
+  event          Event
+  payloadHash    String
   timestamp      DateTime @default(now())
   idempotencyKey String  @unique
   queueMessages  QueueMessage[]
