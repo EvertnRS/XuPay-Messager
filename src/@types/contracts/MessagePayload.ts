@@ -10,7 +10,7 @@ export type JsonValue =
 
 export type MessagePayload = Payload & {
   kind: "MESSAGE_PAYLOAD";
-  service: string;
+  event: string;
   idempotencyKey: string;
   apiPayload: JsonValue;
 };

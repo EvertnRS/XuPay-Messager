@@ -6,8 +6,8 @@ export interface IQueueMessageRepository {
 
     findMessagePayloadById(id: string): Promise<{
     message: {
-        service: string;
-        payloadHash: string;
+        event: string;
+        payloadEncrypted: string;
     };
     } | null>
     findById(id: string): Promise<QueueMessage | null>;

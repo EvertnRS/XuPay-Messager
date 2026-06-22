@@ -594,7 +594,7 @@ export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof
 
 export const MessageScalarFieldEnum = {
   id: 'id',
-  service: 'service',
+  event: 'event',
   payloadEncrypted: 'payloadEncrypted',
   timestamp: 'timestamp',
   idempotencyKey: 'idempotencyKey'
@@ -646,6 +646,20 @@ export type StringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 
  * Reference to a field of type 'String[]'
  */
 export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'String[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Event'
+ */
+export type EnumEventFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Event'>
+    
+
+
+/**
+ * Reference to a field of type 'Event[]'
+ */
+export type ListEnumEventFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Event[]'>
     
 
 

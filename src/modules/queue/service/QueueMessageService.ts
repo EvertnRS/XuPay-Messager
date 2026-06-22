@@ -3,6 +3,7 @@ import { QueueMessage } from "../domain/entity/QueueMessage";
 import { Socket } from "net";
 import { ResponseParser } from "@/infra/parser/ResponseParser";
 import { ErrorHandler } from "@/infra/middleware/Error";
+import { QueueStatus } from '../../../infra/database/generated/enums';
 
 export class QueueMessageService {
     constructor(
@@ -18,6 +19,11 @@ export class QueueMessageService {
     }
 
     public async updateQueueMessage(queueMessage: QueueMessage): Promise<void> {
+        if (!Object.values(QueueStatus).includes(queueMessage.status as QueueStatus)){
+            console.log(`Status inválido: ${queueMessage.status}`);
+            return;
+        }
+
         await this.queueMessageRepository.updateMessage(queueMessage);
     }
 

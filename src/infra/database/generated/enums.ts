@@ -18,3 +18,14 @@ export const QueueStatus = {
 } as const
 
 export type QueueStatus = (typeof QueueStatus)[keyof typeof QueueStatus]
+
+
+export const Event = {
+  CREATE_TRANSACTION: 'CREATE_TRANSACTION',
+  UPDATE_TRANSACTION: 'UPDATE_TRANSACTION',
+  DELETE_TRANSACTION: 'DELETE_TRANSACTION',
+  CREATE_HISTORY: 'CREATE_HISTORY',
+  UPDATE_CUSTOMER: 'UPDATE_CUSTOMER'
+} as const
+
+export type Event = (typeof Event)[keyof typeof Event]

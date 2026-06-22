@@ -20,9 +20,17 @@ enum QueueStatus {
   DEAD_LETTER
 }
 
+enum Event {
+  CREATE_TRANSACTION
+  UPDATE_TRANSACTION
+  DELETE_TRANSACTION
+  CREATE_HISTORY
+  UPDATE_CUSTOMER
+}
+
 model Message {
   id             String   @id @default(uuid()) @map("id")
-  service        String
+  event        Event
   payloadEncrypted    String
   timestamp      DateTime @default(now())
   idempotencyKey String  @unique

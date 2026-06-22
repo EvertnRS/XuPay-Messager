@@ -8,8 +8,8 @@ export class ServiceClient {
     private readonly servicePort: number
   ) {}
 
-  public async send(queueMessageId: string, service: string, payloadHash: string): Promise<void> {
-    const request = this.buildSendRequest(queueMessageId, service, payloadHash);
+  public async send(queueMessageId: string, event: string, payloadHash: string): Promise<void> {
+    const request = this.buildSendRequest(queueMessageId, event, payloadHash);
 
     await this.socketClient.send(
       this.serviceHost,
@@ -19,7 +19,7 @@ export class ServiceClient {
 
     }
 
-  private buildSendRequest(queueMessageId: string, service: string, payloadHash: string): string {
+  private buildSendRequest(queueMessageId: string, event: string, payloadHash: string): string {
     return ResponseParser.serialize({
       method: "POST",
       path: "redirect",
@@ -28,7 +28,7 @@ export class ServiceClient {
       body: {
         payload:{
           queueMessageId,
-          service,
+          event,
           payloadHash
         },
         timestamp: new Date().toISOString(),

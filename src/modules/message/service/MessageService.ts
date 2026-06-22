@@ -8,6 +8,7 @@ import { ResponseParser } from "@/infra/parser/ResponseParser";
 import crypto from "crypto";
 import { JsonValue } from "@/@types/contracts/MessagePayload";
 import { JsonCodec } from "@/infra/parser/JsonCodec";
+import { Event } from '../../../infra/database/generated/enums';
 
 export class MessageService {
   private readonly messageWorker: MessageWorker;
@@ -25,6 +26,10 @@ export class MessageService {
       return ErrorHandler.handle("Payload inválido para publicação", socket);
     }
 
+    if (!Object.values(Event).includes(messageBody.payload.event as Event)){
+        return ErrorHandler.handle(`Evento inválido: ${messageBody.payload.event}`, socket);
+    }
+
     const apiPayload = messageBody.payload.apiPayload;
 
     const existingMessage = await this.messageRepository.findByIdempotencyKey(
@@ -38,7 +43,7 @@ export class MessageService {
     const payloadEncrypted = this.generatePayloadEncrypted(apiPayload);
 
     const savedMessage = await this.messageRepository.saveMessage({
-      service: messageBody.payload.service,
+      event: messageBody.payload.event,
       payloadEncrypted,
       timestamp: messageBody.timestamp ? new Date(messageBody.timestamp) : new Date(),
       idempotencyKey: messageBody.payload.idempotencyKey
@@ -49,7 +54,7 @@ export class MessageService {
     });
 
     const responseBody = {
-      service: messageBody.payload.service,
+      event: messageBody.payload.event,
       payloadEncrypted,
       timestamp: new Date().toISOString(),
     };
@@ -62,9 +67,9 @@ export class MessageService {
 
   private generatePayloadEncrypted(payload: JsonValue): string {
     const key = Buffer.from(
-    process.env.XUPAY_ENCRYPTION_KEY || "",
-    "hex"
-  );
+      process.env.XUPAY_ENCRYPTION_KEY || "",
+      "hex"
+    );
 
     const iv = crypto.randomBytes(16);
 

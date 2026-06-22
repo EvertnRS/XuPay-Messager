@@ -34,7 +34,7 @@ export class ResponseParser {
     const path = normalizePath(request.path);
     const rawBody = JsonCodec.stringify(request.body);
     const headers: RequestHeaders = {
-      host: "xupay-mensageria",
+      host: "xupay-message",
       "content-type": "application/json",
       "content-length": Buffer.byteLength(rawBody).toString(),
       ...this.normalizeHeaders(request.headers || {}),
@@ -132,7 +132,7 @@ export class ResponseParser {
 
     return {
       kind: "MESSAGE_PAYLOAD",
-      service: body.service,
+      event: body.service,
       idempotencyKey: body.idempotencyKey,
       apiPayload: body.apiPayload,
     };
