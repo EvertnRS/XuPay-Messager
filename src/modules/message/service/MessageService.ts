@@ -52,7 +52,7 @@ export class MessageService {
     const responseBody = {
       event: event,
       payloadEncrypted,
-      timestamp: new Date().toISOString(),
+      timestamp: new Date(timestamp).toISOString(),
     };
 
     const response = ResponseParser.serializeResponse(201, responseBody);
