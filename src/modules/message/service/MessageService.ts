@@ -35,11 +35,11 @@ export class MessageService {
       return ErrorHandler.handle("Mensagem já existe", socket);
     }
 
-    const payloadHash = this.generatePayloadHash(apiPayload);
+    const payloadEncrypted = this.generatePayloadEncrypted(apiPayload);
 
     const savedMessage = await this.messageRepository.saveMessage({
       service: messageBody.payload.service,
-      payloadHash,
+      payloadEncrypted,
       timestamp: messageBody.timestamp ? new Date(messageBody.timestamp) : new Date(),
       idempotencyKey: messageBody.payload.idempotencyKey
     });
@@ -50,7 +50,7 @@ export class MessageService {
 
     const responseBody = {
       service: messageBody.payload.service,
-      payloadHash,
+      payloadEncrypted,
       timestamp: new Date().toISOString(),
     };
 
@@ -60,10 +60,30 @@ export class MessageService {
     socket.end();
   }
 
-  private generatePayloadHash(payload: JsonValue): string {
-    return crypto
-      .createHash("sha256")
-      .update(JsonCodec.stableStringify(payload))
-      .digest("hex");
+  private generatePayloadEncrypted(payload: JsonValue): string {
+    const key = Buffer.from(
+    process.env.XUPAY_ENCRYPTION_KEY || "",
+    "hex"
+  );
+
+    const iv = crypto.randomBytes(16);
+
+    const cipher = crypto.createCipheriv(
+      "aes-256-cbc",
+      key,
+      iv
+    );
+
+    const encrypted =
+    cipher.update(
+      JsonCodec.stableStringify(payload),
+      "utf8",
+      "hex"
+    ) +
+    cipher.final("hex");
+
+    const result = `${iv.toString("hex")}:${encrypted}`;
+
+    return result;
   }
 }

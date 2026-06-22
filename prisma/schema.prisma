@@ -23,7 +23,7 @@ enum QueueStatus {
 model Message {
   id             String   @id @default(uuid()) @map("id")
   service        String
-  payloadHash    String
+  payloadEncrypted    String
   timestamp      DateTime @default(now())
   idempotencyKey String  @unique
   queueMessages  QueueMessage[]
