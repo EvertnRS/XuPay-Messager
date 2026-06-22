@@ -26,9 +26,11 @@ export class ServiceClient {
       service: process.env.XUPAY_SERVICE_NAME || "xupay-mensageria",
       secret: process.env.XUPAY_SERVICE_SECRET,
       body: {
-        queueMessageId,
-        service,
-        payloadHash,
+        payload:{
+          queueMessageId,
+          service,
+          payloadHash
+        },
         timestamp: new Date().toISOString(),
       },
     });
