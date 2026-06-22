@@ -6,8 +6,8 @@ export class MessageRepositoryImpl implements IMessageRepository {
     public async saveMessage(message: Omit<Message, 'id' | 'queueMessages'>): Promise<Message> {
         return await (prismaClient.message.create as any)({
             data: {
-                service: message.service,
-                payloadHash: message.payloadHash,
+                event: message.event,
+                payloadEncrypted: message.payloadEncrypted,
                 timestamp: message.timestamp,
                 idempotencyKey: message.idempotencyKey
             }

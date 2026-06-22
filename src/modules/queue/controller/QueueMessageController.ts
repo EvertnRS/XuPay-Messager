@@ -2,6 +2,7 @@ import { Socket } from "net";
 import { QueueMessageService } from "../service/QueueMessageService";
 import type { Request }  from "../../../@types/contracts/Request";
 import { isValidRequest } from "@/@types/contracts/Request";
+import type { QueueMessagePayload } from "@/@types/contracts/QueueMessagePayload";
 
 export class QueueMessageController{
     constructor(
@@ -15,9 +16,11 @@ export class QueueMessageController{
             return;
         }
 
-        const messageBody = request.body;
+        const payload = request.body.payload;
 
-        this.queueMessageService.retryMessage(messageBody, socket);
+        const { kind, id } = payload as QueueMessagePayload;
+
+        void this.queueMessageService.retryMessage(kind, id, socket);
 
     }
     

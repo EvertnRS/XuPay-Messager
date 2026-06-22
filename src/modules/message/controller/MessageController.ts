@@ -1,6 +1,7 @@
 import { Socket } from "net";
 import { Request, isValidRequest} from "@/@types/contracts/Request";
 import { MessageService } from "../service/MessageService";
+import { MessagePayload } from "@/@types/contracts/MessagePayload";
 
 export class MessageController{
     constructor(
@@ -14,8 +15,17 @@ export class MessageController{
             return;
         }
 
-        const messageBody = request.body;
+        const payload = request.body.payload;
 
-        this.messageService.publish(messageBody, socket);
+        const { event, apiPayload, idempotencyKey } = payload as MessagePayload;
+        const { timestamp } = request.body;
+
+        void this.messageService.publish(
+            event,
+            apiPayload,
+            idempotencyKey,
+            timestamp || "",
+            socket
+        );
     }
 }

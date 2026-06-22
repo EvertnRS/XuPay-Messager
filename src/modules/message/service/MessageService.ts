@@ -21,19 +21,15 @@ export class MessageService {
     this.messageWorker.register();
   }
 
-  public async publish(messageBody: any, socket: Socket): Promise<void> {
-    if (messageBody.payload.kind !== "MESSAGE_PAYLOAD") {
-      return ErrorHandler.handle("Payload inválido para publicação", socket);
+  public async publish(event: string, apiPayload: JsonValue, idempotencyKey: string, timestamp: string, socket: Socket): Promise<void> {
+    if (!Object.values(Event).includes(event as Event)){
+      return ErrorHandler.handle(`Evento inválido: ${event}`, socket);
     }
 
-    if (!Object.values(Event).includes(messageBody.payload.event as Event)){
-        return ErrorHandler.handle(`Evento inválido: ${messageBody.payload.event}`, socket);
-    }
-
-    const apiPayload = messageBody.payload.apiPayload;
+    console.log(`Publicando evento: ${event} com idempotencyKey: ${idempotencyKey}`);
 
     const existingMessage = await this.messageRepository.findByIdempotencyKey(
-      messageBody.payload.idempotencyKey
+      idempotencyKey
     );
 
     if (existingMessage) {
@@ -43,10 +39,10 @@ export class MessageService {
     const payloadEncrypted = this.generatePayloadEncrypted(apiPayload);
 
     const savedMessage = await this.messageRepository.saveMessage({
-      event: messageBody.payload.event,
+      event: event,
       payloadEncrypted,
-      timestamp: messageBody.timestamp ? new Date(messageBody.timestamp) : new Date(),
-      idempotencyKey: messageBody.payload.idempotencyKey
+      timestamp: timestamp ? new Date(timestamp) : new Date(),
+      idempotencyKey: idempotencyKey
     });
 
     queueEventBus.emit("MESSAGE_CREATED", {
@@ -54,7 +50,7 @@ export class MessageService {
     });
 
     const responseBody = {
-      event: messageBody.payload.event,
+      event: event,
       payloadEncrypted,
       timestamp: new Date().toISOString(),
     };

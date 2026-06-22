@@ -8,6 +8,8 @@ import type { QueueMessagePayload } from "@/@types/contracts/QueueMessagePayload
 import type { Payload } from "@/@types/contracts/MessageBody";
 import { JsonCodec } from "./JsonCodec";
 import type { JsonObject } from "./JsonCodec";
+import { Event } from "../../infra/database/generated/enums";
+
 
 type SerializableRequest = {
   method: string;
@@ -115,8 +117,8 @@ export class ResponseParser {
   }
 
   private static parseMessagePayload(body: JsonObject): MessagePayload {
-    if (typeof body.service !== "string" || !body.service.trim()) {
-      throw new Error("Payload inválido. Campo service ausente.");
+    if (typeof body.event !== "string" || !body.event.trim()) {
+      throw new Error("Payload inválido. Campo event ausente.");
     }
 
     if (
@@ -132,7 +134,7 @@ export class ResponseParser {
 
     return {
       kind: "MESSAGE_PAYLOAD",
-      event: body.service,
+      event: body.event,
       idempotencyKey: body.idempotencyKey,
       apiPayload: body.apiPayload,
     };

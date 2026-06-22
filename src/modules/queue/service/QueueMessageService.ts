@@ -27,20 +27,20 @@ export class QueueMessageService {
         await this.queueMessageRepository.updateMessage(queueMessage);
     }
 
-    public async retryMessage(messageBody: any, socket: Socket): Promise<void> {
+    public async retryMessage(kind: string, id: string, socket: Socket): Promise<void> {
 
-        if (messageBody.payload.kind !== "QUEUE_MESSAGE_PAYLOAD") {
+        if (kind !== "QUEUE_MESSAGE_PAYLOAD") {
             return ErrorHandler.handle("Payload inválido para publicação", socket);
         }
 
-        if (!messageBody.payload.id) {
+        if (!id) {
             throw new Error("Payload deve conter um id para retry");
         }
 
-        const queueMessage = await this.queueMessageRepository.findById(messageBody.payload.id);
+        const queueMessage = await this.queueMessageRepository.findById(id);
 
         if (!queueMessage) {
-            throw new Error(`Mensagem com id ${messageBody.payload.id} não encontrada`);
+            throw new Error(`Mensagem com id ${id} não encontrada`);
         }
 
         await this.internalRetryMessage(queueMessage);
