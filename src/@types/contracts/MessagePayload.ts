@@ -13,4 +13,5 @@ export type MessagePayload = Payload & {
   event: string;
   idempotencyKey: string;
   apiPayload: JsonValue;
+  timestamp: string;
 };

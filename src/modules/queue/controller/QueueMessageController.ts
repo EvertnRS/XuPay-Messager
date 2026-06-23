@@ -18,9 +18,9 @@ export class QueueMessageController{
 
         const payload = request.body.payload;
 
-        const { kind, id } = payload as QueueMessagePayload;
+        const { kind, queueMessageId } = payload as QueueMessagePayload;
 
-        void this.queueMessageService.retryMessage(kind, id, socket);
+        void this.queueMessageService.retryMessage(kind, queueMessageId, socket);
 
     }
     

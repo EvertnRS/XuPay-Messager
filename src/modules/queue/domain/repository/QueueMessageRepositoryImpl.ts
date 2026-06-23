@@ -34,7 +34,7 @@ export class QueueMessageRepositoryImpl implements IQueueMessageRepository {
     public async findMessagePayloadById(id: string): Promise<{
     message: {
         event: string;
-        payloadEncrypted: string;
+        payloadHash: string;
     };
     } | null> {
         const result = await (prismaClient.queueMessage.findUnique as any)({
@@ -49,7 +49,7 @@ export class QueueMessageRepositoryImpl implements IQueueMessageRepository {
         return {
             message: {
                 event: result.message.event,
-                payloadEncrypted: result.message.payloadEncrypted
+                payloadHash: result.message.payloadHash
             }
         };
     }

@@ -8,8 +8,6 @@ import type { QueueMessagePayload } from "@/@types/contracts/QueueMessagePayload
 import type { Payload } from "@/@types/contracts/MessageBody";
 import { JsonCodec } from "./JsonCodec";
 import type { JsonObject } from "./JsonCodec";
-import { Event } from "../../infra/database/generated/enums";
-
 
 type SerializableRequest = {
   method: string;
@@ -87,16 +85,24 @@ export class ResponseParser {
     const [method, rawPath] = requestLine.split(" ");
     const headers = this.parseHeaders(headerLines);
     const parsedBody = this.parseJsonObject(rawBody);
+    const path = normalizePath(rawPath);
+    const body = this.parseMessageBody(path, parsedBody);
 
     return {
       method: method.toUpperCase(),
       path: normalizePath(rawPath),
       headers,
-      body: {
-        payload: this.parsePayloadByPath(normalizePath(rawPath), parsedBody),
-        timestamp: this.optionalString(parsedBody.timestamp),
-      },
-      rawBody
+      body,
+      rawBody,
+    };
+  }
+
+  private static parseMessageBody(
+    path: string,
+    body: JsonObject
+  ): Request["body"] {
+    return {
+      payload: this.parsePayloadByPath(path, body)
     };
   }
 
@@ -109,7 +115,7 @@ export class ResponseParser {
       return this.parseQueueMessagePayload(body);
     }
 
-    if (typeof body.id === "string") {
+    if (typeof body.queueMessageId === "string") {
       return this.parseQueueMessagePayload(body);
     }
 
@@ -137,17 +143,18 @@ export class ResponseParser {
       event: body.event,
       idempotencyKey: body.idempotencyKey,
       apiPayload: body.apiPayload,
+      timestamp: typeof body.timestamp === "string" ? body.timestamp : new Date().toISOString()
     };
   }
 
   private static parseQueueMessagePayload(body: JsonObject): QueueMessagePayload {
-    if (typeof body.id !== "string" || !body.id.trim()) {
-      throw new Error("Payload inválido. Campo id ausente.");
+    if (typeof body.queueMessageId !== "string" || !body.queueMessageId.trim()) {
+      throw new Error("Payload inválido. Campo queueMessageId ausente.");
     }
 
     return {
       kind: "QUEUE_MESSAGE_PAYLOAD",
-      id: body.id,
+      queueMessageId: body.queueMessageId,
     };
   }
 

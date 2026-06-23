@@ -17,8 +17,7 @@ export class MessageController{
 
         const payload = request.body.payload;
 
-        const { event, apiPayload, idempotencyKey } = payload as MessagePayload;
-        const { timestamp } = request.body;
+        const { event, apiPayload, idempotencyKey, timestamp } = payload as MessagePayload;
 
         void this.messageService.publish(
             event,

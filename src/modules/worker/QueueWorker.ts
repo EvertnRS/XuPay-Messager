@@ -62,7 +62,7 @@ export class QueueWorker {
                     continue;
                 }
 
-                await this.serviceClient.send(nextMessage.id, payloadData.message.event, payloadData.message.payloadEncrypted);
+                await this.serviceClient.send(nextMessage.id, payloadData.message.event, payloadData.message.payloadHash);
 
                 await this.queueMessageService.updateQueueMessage({
                     ...nextMessage,

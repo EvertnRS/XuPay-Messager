@@ -5,5 +5,4 @@ export type Payload = MessagePayload | QueueMessagePayload;
 
 export type MessageBody = {
     payload: Payload;
-    timestamp?: string;
 };

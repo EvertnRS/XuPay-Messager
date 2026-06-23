@@ -15,6 +15,10 @@ export class JsonCodec {
   }
 
   public static stringify(value: JsonValue): string {
+    if (value === undefined) {
+      throw new Error("JSON não suporta undefined");
+    }
+
     if (value === null) {
       return "null";
     }
@@ -45,6 +49,10 @@ export class JsonCodec {
   }
 
   public static stableStringify(value: JsonValue): string {
+    if (value === undefined) {
+      throw new Error("JSON não suporta undefined");
+    }
+
     if (Array.isArray(value)) {
       return `[${value.map((item) => this.stableStringify(item)).join(",")}]`;
     }

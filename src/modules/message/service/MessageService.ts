@@ -41,7 +41,7 @@ export class MessageService {
     const savedMessage = await this.messageRepository.saveMessage({
       event: event,
       payloadHash,
-      timestamp: timestamp ? new Date(timestamp) : new Date(),
+      timestamp: new Date(timestamp),
       idempotencyKey: idempotencyKey
     });
 
@@ -52,7 +52,7 @@ export class MessageService {
     const responseBody = {
       event: event,
       payload: JsonCodec.stableStringify(apiPayload),
-      timestamp: new Date(timestamp).toISOString(),
+      timestamp: timestamp
     };
 
     const response = ResponseParser.serializeResponse(201, responseBody);
