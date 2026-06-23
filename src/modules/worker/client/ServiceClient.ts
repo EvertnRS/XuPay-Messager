@@ -30,9 +30,8 @@ export class ServiceClient {
           queueMessageId,
           event,
           payloadHash
-        },
-        timestamp: new Date().toISOString(),
-      },
+        }
+      }
     });
   }
 }
