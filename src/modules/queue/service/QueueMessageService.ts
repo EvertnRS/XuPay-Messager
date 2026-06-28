@@ -34,13 +34,13 @@ export class QueueMessageService {
         }
 
         if (!id) {
-            throw new Error("Payload deve conter um id para retry");
+            return ErrorHandler.handle("O id é obrigatório para retry", socket);
         }
 
         const queueMessage = await this.queueMessageRepository.findById(id);
 
         if (!queueMessage) {
-            throw new Error(`Mensagem com id ${id} não encontrada`);
+            return ErrorHandler.handle(`Mensagem com id ${id} não encontrada`, socket);
         }
 
         await this.internalRetryMessage(queueMessage);
@@ -65,7 +65,7 @@ export class QueueMessageService {
                 status: 'FAILED'
             });
 
-            throw new Error(`Mensagem ${queueMessage.id} excedeu o número máximo de tentativas.`);
+            console.log(`Mensagem ${queueMessage.id} excedeu o número máximo de tentativas.`);
             
         } else {
             await this.queueMessageRepository.updateMessage({
