@@ -58,7 +58,7 @@ export class QueueMessageService {
         socket.end();
     }
 
-    public async internalRetryMessage(queueMessage: QueueMessage): Promise<void> {
+    public async internalRetryMessage(queueMessage: QueueMessage): Promise<QueueMessage> {
         if(queueMessage.retryCount + 1 > QueueMessageService.MAX_RETRIES) {
             await this.queueMessageRepository.updateMessage({
                 ...queueMessage,
@@ -66,6 +66,7 @@ export class QueueMessageService {
             });
 
             console.log(`Mensagem ${queueMessage.id} excedeu o número máximo de tentativas.`);
+            return queueMessage;
             
         } else {
             await this.queueMessageRepository.updateMessage({
@@ -73,6 +74,7 @@ export class QueueMessageService {
                 status: 'PENDING',
                 retryCount: queueMessage.retryCount + 1
             });
+            return queueMessage;
         }
     }
 }

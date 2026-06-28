@@ -62,7 +62,13 @@ export class QueueWorker {
                     continue;
                 }
 
-                await this.serviceClient.send(nextMessage.id, payloadData.message.event, payloadData.message.payloadHash);
+                try{
+                    await this.serviceClient.send(nextMessage.id, payloadData.message.event, payloadData.message.payloadHash);
+                } catch (error) {
+                    console.error("[Worker] Erro ao enviar mensagem:", error);
+                    await this.queueMessageService.internalRetryMessage(nextMessage);
+                    continue;
+                }
 
                 await this.queueMessageService.updateQueueMessage({
                     ...nextMessage,
