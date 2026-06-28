@@ -14,8 +14,8 @@ export class QueueWorker {
         const socketClient = new SocketClient();
         this.serviceClient = new ServiceClient(
             socketClient, 
-            process.env.SERVICE_CLIENT_HOST || ' ', 
-            parseInt(process.env.SERVICE_CLIENT_PORT || ' ')
+            process.env.SERVICE_HOST || ' ', 
+            parseInt(process.env.SERVICE_PORT || ' ')
         );
 
     }

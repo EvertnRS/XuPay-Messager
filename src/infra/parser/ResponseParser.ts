@@ -3,7 +3,8 @@ import {
   normalizePath,
 } from "../../@types/contracts/Request";
 import type { Request, RequestHeaders } from "../../@types/contracts/Request";
-import type { MessagePayload, JsonValue } from "@/@types/contracts/MessagePayload";
+import type { JsonValue } from "../../@types/contracts/JsonValue";
+import type { MessagePayload } from "@/@types/contracts/MessagePayload";
 import type { QueueMessagePayload } from "@/@types/contracts/QueueMessagePayload";
 import type { Payload } from "@/@types/contracts/MessageBody";
 import { JsonCodec } from "./JsonCodec";
