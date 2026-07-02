@@ -139,6 +139,10 @@ export class ResponseParser {
       throw new Error("Payload inválido. Campo apiPayload ausente.");
     }
 
+    if (typeof body.apiPayload !== "string") {
+      throw new Error("Payload inválido. Campo apiPayload deve ser uma string.");
+    }
+
     return {
       kind: "MESSAGE_PAYLOAD",
       event: body.event,
