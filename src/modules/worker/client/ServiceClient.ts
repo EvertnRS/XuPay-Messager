@@ -17,7 +17,7 @@ export class ServiceClient {
       request
     );
 
-    }
+  }
 
   private buildSendRequest(queueMessageId: string, event: string, payloadHash: string): string {
     return ResponseParser.serialize({
@@ -29,10 +29,9 @@ export class ServiceClient {
         payload:{
           queueMessageId,
           event,
-          payloadHash
-        },
-        timestamp: new Date().toISOString(),
-      },
+          apiPayload: payloadHash
+        }
+      }
     });
   }
 }

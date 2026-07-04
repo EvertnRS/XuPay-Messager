@@ -6,8 +6,6 @@ import { QueueMessageService } from "@/modules/queue/service/QueueMessageService
 import { MessageWorker } from "@/modules/worker/MessageWorker";
 import { ResponseParser } from "@/infra/parser/ResponseParser";
 import crypto from "crypto";
-import { JsonValue } from "@/@types/contracts/MessagePayload";
-import { JsonCodec } from "@/infra/parser/JsonCodec";
 import { Event } from '../../../infra/database/generated/enums';
 
 export class MessageService {
@@ -21,7 +19,7 @@ export class MessageService {
     this.messageWorker.register();
   }
 
-  public async publish(event: string, apiPayload: JsonValue, idempotencyKey: string, timestamp: string, socket: Socket): Promise<void> {
+  public async publish(event: string, apiPayload: string, idempotencyKey: string, timestamp: string, socket: Socket): Promise<void> {
     if (!Object.values(Event).includes(event as Event)){
       return ErrorHandler.handle(`Evento inválido: ${event}`, socket);
     }
@@ -36,7 +34,7 @@ export class MessageService {
       return ErrorHandler.handle("Mensagem já existe", socket);
     }
 
-    const payloadHash = this.generatePayloadHash(JsonCodec.stableStringify(apiPayload));
+    const payloadHash = this.generatePayloadHash(apiPayload);
 
     const savedMessage = await this.messageRepository.saveMessage({
       event: event,
@@ -51,7 +49,7 @@ export class MessageService {
 
     const responseBody = {
       event: event,
-      payload: JsonCodec.stableStringify(apiPayload),
+      payload: apiPayload,
       timestamp: timestamp
     };
 
