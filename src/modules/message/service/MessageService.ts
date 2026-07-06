@@ -34,11 +34,11 @@ export class MessageService {
       return ErrorHandler.handle("Mensagem já existe", socket);
     }
 
-    const payloadHash = this.generatePayloadHash(apiPayload);
+    //const payloadHash = this.generatePayloadHash(apiPayload);
 
     const savedMessage = await this.messageRepository.saveMessage({
       event: event,
-      payloadHash,
+      payloadHash: apiPayload,
       timestamp: new Date(timestamp),
       idempotencyKey: idempotencyKey
     });
